@@ -6,35 +6,35 @@
 #include<mutex>
 using namespace std;
 
-//ÓÃ³ÉÔ±º¯Êı×÷ÎªÏß³Ì³õÊ¼»¯º¯Êı
+//ç”¨æˆå‘˜å‡½æ•°ä½œä¸ºçº¿ç¨‹åˆå§‹åŒ–å‡½æ•°
 
 class A
 {
 public:
-	//°ÑÊÕµ½µÄÏûÏ¢Èëµ½Ò»¸ö¶ÓÁĞ£¬×ÓÏß³ÌµÄÆô¶¯º¯Êı
+	//æŠŠæ”¶åˆ°çš„æ¶ˆæ¯å…¥åˆ°ä¸€ä¸ªé˜Ÿåˆ—ï¼Œå­çº¿ç¨‹çš„å¯åŠ¨å‡½æ•°
 	void inMsgRecvQueue()
 	{
 		for (int i = 0; i < 10000; i++)
 		{
-			cout << "inMsgQueue²åÈëÒ»¸öÔªËØ" << i << endl;
+			cout << "inMsgQueueæ’å…¥ä¸€ä¸ªå…ƒç´ " << i << endl;
 
-			//my_mutex1.lock();//ÏÈËøÒ»¸öËø£¬ÔÙËøÒ»¸öËø
-			////Á½¸öËø²»Ò»¶¨°¤×Å£¬¿ÉÄÜ±£´æ²»Í¬µÄ´úÂë
+			//my_mutex1.lock();//å…ˆé”ä¸€ä¸ªé”ï¼Œå†é”ä¸€ä¸ªé”
+			////ä¸¤ä¸ªé”ä¸ä¸€å®šæŒ¨ç€ï¼Œå¯èƒ½ä¿å­˜ä¸åŒçš„ä»£ç 
 			//my_mutex2.lock();
-			//Ò²¿ÉÒÔÊ¹ÓÃlock_guard()
+			//ä¹Ÿå¯ä»¥ä½¿ç”¨lock_guard()
 			//lock_guard<mutex> mylock1(my_mutex1);
 
-			lock(my_mutex2, my_mutex1);//ºÍË³ĞòÎŞ¹Ø
-			lock_guard<mutex> myGuard1(my_mutex1, adopt_lock);
+			lock(my_mutex2, my_mutex1);//å’Œé¡ºåºæ— å…³
+			lock_guard<mutex> myGuard1(my_mutex1, adopt_lock);//adopt_lockçš„ä½œç”¨æ˜¯å‘Šè¯‰lock_guardä¸ç”¨è´Ÿè´£å»è°ƒç”¨lock()æ–¹æ³•
 			lock_guard<mutex> myGuard2(my_mutex2, adopt_lock);
-			//×Ô¶¯ÅĞ¶ÏÊÇ·ñĞèÒªÉÏËø
+			//è‡ªåŠ¨åˆ¤æ–­æ˜¯å¦éœ€è¦ä¸Šé”
 
-			msgRecvQueue.push_back(i);//¼ÙÉèÕâ¸öÊı×Öi¾ÍÊÇÊÕµ½µÄÍæ¼ÒµÄÃüÁî
+			msgRecvQueue.push_back(i);//å‡è®¾è¿™ä¸ªæ•°å­—iå°±æ˜¯æ”¶åˆ°çš„ç©å®¶çš„å‘½ä»¤
 			/*my_mutex1.unlock();
 			my_mutex2.unlock();*/
 		}
 	}
-	//¶Á¹²ÏíÊı¾İº¯ÊıµÄ·â×°º¯Êı
+	//è¯»å…±äº«æ•°æ®å‡½æ•°çš„å°è£…å‡½æ•°
 	bool outMsgprocess(int&command)
 	{
 		/*my_mutex2.lock();
@@ -42,12 +42,12 @@ public:
 		lock(my_mutex1, my_mutex2);
 		lock_guard<mutex> myGuard1(my_mutex1, adopt_lock);
 		lock_guard<mutex> myGuard2(my_mutex2, adopt_lock);
-		//Ïàµ±ÓÚÃ¿Ò»¸ö»¥³âÁ¿¶¼µ÷ÓÃÁËlock()
+		//ç›¸å½“äºæ¯ä¸€ä¸ªäº’æ–¥é‡éƒ½è°ƒç”¨äº†lock()
 		if (!msgRecvQueue.empty())
 		{
-			//ÏûÏ¢¶ÓÁĞ²»Îª¿Õ
-			int command = msgRecvQueue.front();//·µ»ØµÚÒ»¸öÔªËØ
-			msgRecvQueue.pop_front();//ÒÆ³ıµÚÒ»¸öÔªËØ
+			//æ¶ˆæ¯é˜Ÿåˆ—ä¸ä¸ºç©º
+			int command = msgRecvQueue.front();//è¿”å›ç¬¬ä¸€ä¸ªå…ƒç´ 
+			msgRecvQueue.pop_front();//ç§»é™¤ç¬¬ä¸€ä¸ªå…ƒç´ 
 			/*my_mutex1.unlock();
 			my_mutex2.unlock();*/
 			return true;
@@ -55,12 +55,12 @@ public:
 	/*	my_mutex1.unlock();
 		my_mutex2.unlock();*/
 		return false;
-		//ËùÓĞ·ÖÖ§¶¼ÒªÓĞunlock()£¬Á½¸ö³ö¿Ú±ØĞëÓĞÁ½¸öunlock()
+		//æ‰€æœ‰åˆ†æ”¯éƒ½è¦æœ‰unlock()ï¼Œä¸¤ä¸ªå‡ºå£å¿…é¡»æœ‰ä¸¤ä¸ªunlock()
 
 	}
 
 
-	//°ÑÊı¾İ´ÓÏûÏ¢¶ÓÁĞÖĞÈ¡³öµÄ×ÓÏß³Ì
+	//æŠŠæ•°æ®ä»æ¶ˆæ¯é˜Ÿåˆ—ä¸­å–å‡ºçš„å­çº¿ç¨‹
 	void outMsgRecvQueue()
 	{
 		int command = 0;
@@ -69,19 +69,19 @@ public:
 			bool result = outMsgprocess(command);
 			if (result == true)
 			{
-				cout << "È¡ÏûÏ¢º¯ÊıÖ´ĞĞ³É¹¦" << command << endl;
+				cout << "å–æ¶ˆæ¯å‡½æ•°æ‰§è¡ŒæˆåŠŸ" << command << endl;
 			}
 			else
 			{
-				cout << "ÏûÏ¢¶ÓÁĞÖĞµÄÏûÏ¢Îª¿Õ" << i << endl;
+				cout << "æ¶ˆæ¯é˜Ÿåˆ—ä¸­çš„æ¶ˆæ¯ä¸ºç©º" << i << endl;
 			}
 		}
 
 		cout << endl;
 	}
 private:
-	list<int>msgRecvQueue;//ÈİÆ÷ÓÃÀ´´æ·ÅÍæ¼Ò·¢ËÍ¹ıÀ´µÄÃüÁî
-	//´´½¨Ò»¸ö»¥³âÁ¿µÄ³ÉÔ±±äÁ¿
+	list<int>msgRecvQueue;//å®¹å™¨ç”¨æ¥å­˜æ”¾ç©å®¶å‘é€è¿‡æ¥çš„å‘½ä»¤
+	//åˆ›å»ºä¸€ä¸ªäº’æ–¥é‡çš„æˆå‘˜å˜é‡
 	mutex my_mutex1;
 	mutex my_mutex2;
 };
@@ -90,27 +90,29 @@ private:
 int main(void)
 {
 	A myobj;
-	thread myOutMsgObj(&A::outMsgRecvQueue, &myobj);//µÚ¶ş¸öÊÇÒıÓÃ²ÅÄÜ±£Ö¤Ïß³ÌÖĞÓÃµÄÊÇÍ³Ò»¸ö¶ÔÏó
+	thread myOutMsgObj(&A::outMsgRecvQueue, &myobj);//ç¬¬äºŒä¸ªæ˜¯å¼•ç”¨æ‰èƒ½ä¿è¯çº¿ç¨‹ä¸­ç”¨çš„æ˜¯ç»Ÿä¸€ä¸ªå¯¹è±¡
 	thread myInMsObj(&A::inMsgRecvQueue, &myobj);
 	myOutMsgObj.join();
 	myInMsObj.join();
 
-	cout << "mainÏß³Ì" << endl;//×îºóÖ´ĞĞÕâÒ»¾ä£¬Õû¸öÏß³ÌÍË³ö
+	cout << "mainçº¿ç¨‹" << endl;//æœ€åæ‰§è¡Œè¿™ä¸€å¥ï¼Œæ•´ä¸ªçº¿ç¨‹é€€å‡º
 	system("pause");
 	return 0;
 }
 /*
-*ËÀËøµÄ½â¾ö·½°¸£º
-*std::lock()º¯ÊıÄ£°å£¬
-*ÄÜÁ¦£ºÒ»´ÎËø×¡Á½¸ö»òÕßÁ½¸öÒÔÉÏµÄ»¥³âÁ¿£¬²»´æÔÚÔÙ¶à¸öÏß³ÌÖĞ£¬
-*ÒòÎªËøµÄË³ĞòÎÊÌâµ¼ÖÂµÄËÀËøµÄ·çÏò£¬Èç¹û»¥³âÁ¿ÖĞÓÖÓĞÒ»¸öÃ»Ëø×Å£¬Ëü¾ÍÔÚÄÇÀïµÈ×Å
-*µÈµ½ËùÓĞ»¥³âÁ¿¶¼ÉÏËø£¬²Å»á¼ÌĞøÖ´ĞĞ¡£Èç¹û²»ÄÜÈ«²¿ÉÏËø£¬¾Í°ÑÒÑ¾­Ëø×¡µÄ¶«Î÷ÊÍ·Åµô¡£
-*Ò²¾ÍÊÇËµÖ»ÓĞÈ«²¿Ëø×Å²ÅÉÏËø¡£
-*
-*Ê¹ÓÃlock_guard½â¾ö²»ÓÃunlockÎÊÌâ
-*
-*×Ü½á£º
-*lock()º¯ÊıÊÇÒ»´ÎËø¶¨¶à¸ö»¥³âÁ¿£¬Ã»ÓĞÏÈºóË³Ğò¡£
-*Èç¹û²»ÏëÊÖ¶¯unlock,ÄÇÃ´¾ÍĞèÒªÊ¹ÓÃlock_guard<mutex> myGuard1(my_mutex1, adopt_lock);
+0)å‡ºå‘ç‚¹:å¦‚æœä¸æƒ³æ‰‹åŠ¨unlock,é‚£ä¹ˆå°±éœ€è¦ä½¿ç”¨lock_guard<mutex> myGuard1(my_mutex1, adopt_lock);
+1)std::lock_guardçš„std::adopt_lockå‚æ•°
+std::lock_guardstd::mutex my_guard(my_mutex,std::adopt_lock);
+åŠ å…¥adopt_lockåï¼Œåœ¨è°ƒç”¨lock_guardçš„æ„é€ å‡½æ•°æ—¶ï¼Œä¸å†è¿›è¡Œlock();
+adopt_guardä¸ºç»“æ„ä½“å¯¹è±¡ï¼Œèµ·ä¸€ä¸ªæ ‡è®°ä½œç”¨ï¼Œè¡¨ç¤ºè¿™ä¸ªäº’æ–¥é‡å·²ç»lock()ï¼Œä¸éœ€è¦åœ¨lock()ã€‚
+
+æºç :
+lock_guard(_Mutex& _Mtx, adopt_lock_t)
+		: _MyMutex(_Mtx)
+		{	// construct but don't lock
+		}
+		
+2)æ€»ç»“:
+lock()å‡½æ•°æ˜¯ä¸€æ¬¡é”å®šå¤šä¸ªäº’æ–¥é‡ï¼Œæ²¡æœ‰å…ˆåé¡ºåºã€‚ï¼ˆä½†æ˜¯ä½¿ç”¨åœºæ™¯ä¸å¤šï¼Œè€Œä¸”ä¸çŸ¥é“c++è¿™è´§ç¨³å®šä¸ï¼Œæ‰€ä»¥è€å¸ˆå»ºè®®è¿˜æ˜¯ä¸€ä¸ªä¸€ä¸ªmutex.lock()ï¼‰
 */
 
