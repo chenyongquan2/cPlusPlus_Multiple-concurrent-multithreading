@@ -5,11 +5,11 @@
 #include <mutex>
 using namespace std;
 
-//»¥³âÁ¿
+//äº’æ–¥é‡
 std::mutex resource_mutex;
-std::once_flag gflag;//ÕâÊÇÏµÍ³±ê¼ÇÃÇ»¹Ã»ÓÐ±»ÖÃÎ»
+std::once_flag gflag;//è¿™æ˜¯ç³»ç»Ÿæ ‡è®°ä»¬è¿˜æ²¡æœ‰è¢«ç½®ä½
 
-//µ¥ÀýÀà
+//å•ä¾‹ç±»
 class MyCAS
 {
 public:
@@ -21,18 +21,19 @@ public:
 	}
 
 private:
-	//¹¹Ôìº¯ÊýË½ÓÐ»¯
+	//æž„é€ å‡½æ•°ç§æœ‰åŒ–
 	MyCAS(){}
 private:
-	static MyCAS*m_instance;//¾²Ì¬³ÉÔ±±äÁ¿Ö¸Õë
+	static MyCAS*m_instance;//é™æ€æˆå‘˜å˜é‡æŒ‡é’ˆ
 public:
 	static MyCAS*GetInstance()
 	{
 		std::call_once(gflag, CreateInstance);
-		//Á½¸öÏß³ÌÍ¬Ê±Ö´ÐÐµ½ÕâÀï£¬ÆäÖÐÒ»¸öÏß³ÌµÈ´ýÁíÍâÒ»¸öÏß³ÌÖ´ÐÐÍê±ÏCreateInstance
+		//ä¸¤ä¸ªçº¿ç¨‹åŒæ—¶æ‰§è¡Œåˆ°è¿™é‡Œï¼Œå…¶ä¸­ä¸€ä¸ªçº¿ç¨‹ç­‰å¾…å¦å¤–ä¸€ä¸ªçº¿ç¨‹æ‰§è¡Œå®Œæ¯•CreateInstanceè¿”å›žæ¥ï¼Œ
+		//ç¬¬äºŒä¸ªçº¿ç¨‹çœ‹std::once_flag gflagçš„å€¼ä¸º1äº†ï¼Œå†³å®šä¸åŽ»è°ƒç”¨CreateInstance()
 		return m_instance;
 	}
-	//ÀàÖÐÌ×Ò»¸öÀàÊµÏÖÄÚ´æÊÍ·Å£¨ºÃÏñÃ»Æð×÷ÓÃ£©
+	//ç±»ä¸­å¥—ä¸€ä¸ªç±»å®žçŽ°å†…å­˜é‡Šæ”¾ï¼ˆå¥½åƒæ²¡èµ·ä½œç”¨ï¼‰
 	class ReleaseObject
 	{
 	public:
@@ -40,7 +41,7 @@ public:
 		{
 			if (MyCAS::m_instance)
 			{
-				cout << "Ïú»Ù¶ÔÏó" << endl;
+				cout << "é”€æ¯å¯¹è±¡" << endl;
 				delete MyCAS::m_instance;
 				MyCAS::m_instance = NULL;
 			}
@@ -49,33 +50,33 @@ public:
 	};
 	void function1()
 	{
-		cout << "²âÊÔº¯Êý" << endl;
+		cout << "æµ‹è¯•å‡½æ•°" << endl;
 	}
 
 };
-//ÐèÒª³õÊ¼»¯¾²Ì¬³ÉÔ±±äÁ¿
+//éœ€è¦åˆå§‹åŒ–é™æ€æˆå‘˜å˜é‡
 MyCAS* MyCAS::m_instance = NULL;
 
-//Ïß³ÌÈë¿Úº¯Êý
+//çº¿ç¨‹å…¥å£å‡½æ•°
 void startThread()
 {
-	cout << "Ïß³Ì¿ªÊ¼Ö´ÐÐÁË" << endl;
+	cout << "çº¿ç¨‹å¼€å§‹æ‰§è¡Œäº†" << endl;
 	MyCAS*p_a = MyCAS::GetInstance();
-	cout << "Ïß³ÌÖ´ÐÐÍê±ÏÁË" << endl;
+	cout << "çº¿ç¨‹æ‰§è¡Œå®Œæ¯•äº†" << endl;
 	return;
 
 }
 
 int main(void)
 {
-	////·µ»Ø¸ÃÀà¶ÔÏóµÄÖ¸Õë
+	////è¿”å›žè¯¥ç±»å¯¹è±¡çš„æŒ‡é’ˆ
 	//MyCAS*p_a = MyCAS::GetInstance();
 	//p_a->function1();
 
 
-	//Á½¸öÏß³ÌÊÇÍ¬Ò»¸öÈë¿Úº¯Êý£¬ËùÒÔÕâÀï»áÓÐÁ½¸öÁ÷³Ì»òÕßÁ½ÌõÍ¨Â·Í¬Ê±Ö´ÐÐstartThreadº¯Êý¡£
-	//µ±ÆäÖÐÒ»¸öÏß³Ì½øÈëgetInstance£¬µ«ÊÇ»¹Ã»ÓÐ´´½¨¶ÔÏó£¬ÇÐ»»µ½µÚ¶þ¸öÏß³Ì£¬ÕâÑù¾Í¿ÉÄÜ´´½¨¶à¸ö¶ÔÏó
-	//m_instance == NULL²»´ú±íÃ»±»´´½¨¶ÔÏó£¬¿ÉÄÜÂíÉÏ¾Í»á´´½¨£¬µ«ÊÇÏß³ÌÇÐ»»ÁË
+	//ä¸¤ä¸ªçº¿ç¨‹æ˜¯åŒä¸€ä¸ªå…¥å£å‡½æ•°ï¼Œæ‰€ä»¥è¿™é‡Œä¼šæœ‰ä¸¤ä¸ªæµç¨‹æˆ–è€…ä¸¤æ¡é€šè·¯åŒæ—¶æ‰§è¡ŒstartThreadå‡½æ•°ã€‚
+	//å½“å…¶ä¸­ä¸€ä¸ªçº¿ç¨‹è¿›å…¥getInstanceï¼Œä½†æ˜¯è¿˜æ²¡æœ‰åˆ›å»ºå¯¹è±¡ï¼Œåˆ‡æ¢åˆ°ç¬¬äºŒä¸ªçº¿ç¨‹ï¼Œè¿™æ ·å°±å¯èƒ½åˆ›å»ºå¤šä¸ªå¯¹è±¡
+	//m_instance == NULLä¸ä»£è¡¨æ²¡è¢«åˆ›å»ºå¯¹è±¡ï¼Œå¯èƒ½é©¬ä¸Šå°±ä¼šåˆ›å»ºï¼Œä½†æ˜¯çº¿ç¨‹åˆ‡æ¢äº†
 	thread mythread1(startThread);
 	thread mythread2(startThread);
 	mythread1.join();
@@ -84,30 +85,12 @@ int main(void)
 	system("pause");
 	return 0;
 }
-/*
-* Éè¼ÆÄ£Ê½´ó¸ÅÌ¸
-* ¡°Éè¼ÆÄ£Ê½¡±--´úÂëµÄÒ»Ð©ÌØ¶¨µÄÐ´·¨£¬³ÌÐòÁé»î£¬³ÌÐòÎ¬»¤ÆðÀ´ºÜ·½±ã£¬µ«ÊÇ±ðÈËÔÄ¶ÁÆðÀ´ºÜÍ´¿à
-* ÓÃÉè¼ÆÄ£Ê½Ð´³öµÄ´úÂëºÜ»ÞÉ¬ÄÑ¶®£¬head first£¬
-* ÕâÊÇ±ðÈËÓ¦¸¶ÌØ±ð´óµÄÏîÄ¿ µÄÊ±ºò£¬¸ù¾ÝÊµ¼Ê¿ª·¢¾´Ñö£¬Ä£¿é»®·Ö¾­Ñé£¬×Ü½á³ÌÉè¼ÆÄ£Ê½£¬ÏÈÓÐ¿ª·¢¾­Ñé£¬ºóÓÐÉè¼ÆÄ£Ê½
-* µ«ÊÇµ½ÖÐ¹úÀ´£¬²»Ì«Ò»Ñù£¬ÄÃ×ÅÒ»¸öÏîÄ¿Ó²Ì×Éè¼ÆÄ£Ê½£¬Ò»¸öÐ¡Ð¡ÏîÄ¿£¬·ÇÒªÌ×¼¸¸öÉè¼ÆÄ£Ê½¡£
-* Éè¼ÆÄ£Ê½ÓÐÆä¶ÀÌØµÄÓÐµã£¬Òª»îÑ§»îÓÃ£¬²»ÒªÉú°áÓ²Ì×
-*
-* µ¥ÀýÉè¼ÆÄ£Ê½£ºÊ¹ÓÃµÄÆµÂÊ±È½Ï¸ß¡£
-* ÔÚÕû¸öÏîÄ¿ÖÐ£¬ÓÐÄ³¸öÌØÊâµÄÀà¡£ÇÒÊôÓÚ¸ÃÀàµÄ¶ÔÏóÖ»ÄÜ´´½¨Ò»¸ö¡££¨ÀàµÄÊµÀýÖ»ÄÜÓÐÒ»¸ö£©
-* ÈçÔÚ£ºÅäÖÃÎÄ¼þ¶ÁÐ´µÄÊ±ºòÎª·½±ã¹ÜÀí£¬¾ÍÖ»ÓÐÒ»¸öÀà¶ÔÏó£¬·½±ã¹ÜÀí¡£
-*
-* ÄÚ´æÊÍ·ÅºÃÏñÃ»ÓÐÆð×÷ÓÃ
-*
-* //µ¥ÀýÉè¼ÆÄ£Ê½¹²ÏíÊý¾ÝÎÊÌâ·ÖÎö½â¾ö
-* ×îÀíÏëµÄÊÇÖ÷Ïß³Ì´´½¨µ¥Àý¶ÔÏó£¬µ«ÊÇÊµ¼ÊÖÐ¿ÉÄÜÓÐ¶à¸ö¶ÔÏóÍ¬Ê±µ÷ÓÃGetInstance()º¯ÊýÀ´´´½¨µ¥Àý¶ÔÏó
-* Õâ¸öÊ±ºò¾ÍÐèÒªÊ¹ÓÃ»¥³â
-*
-*
-* //std::call_onceÊÇÒ»¸öº¯ÊýÄ£°å£¬ÊÇc++11ÒýÈëµÄº¯Êý
-* µÚ¶þ¸ö²ÎÊýÊÇÒ»¸öº¯ÊýÃû×Ö£¬call_onceµÄ¹¦ÄÜÊÇ±£Ö¤º¯ÊýÖ»»á±»µ÷ÓÃÒ»´Î
-* call_once¾ßÓÐ»¥³âÁ¿ÕâÖÖÄÜÁ¦£¬¶øÇÒÐ§ÂÊÉÏ£¬Õâ±È»¥³âÀ´¸øÄãÕ¼ÓÃµÄ×ÊÔ´¸üÉÙ
-* call_onceÐèÒªºÍÒ»¸ö±ê¼Ç½áºÏÊ¹ÓÃ£¬Õâ¸ö±ê¼Çonce_flag£¬ÆäÊµÊÇonce_flagÒ»ÖÖ½á¹¹
-* call_once¾ÍÊÇÍ¨¹ýÕâ¸ö±ê¼ÇÅÐ¶Ïº¯ÊýÊÇ·ñÖ´ÐÐ£¬Ö´ÐÐ¹ýº¯Êýºó¾Í°ÑÕâ¸ö²ÎÊýÉèÖÃÎªÒÑ¾­µ÷ÓÃ×´Ì¬
-* ºóÐøÔÙµ÷ÓÃµ«ÊÇ±êÖ¾ÒÑ¾­±»ÉèÖÃÎª¡°ÒÑ¾­µ÷ÓÃ¡±×´Ì¬ÁË£¬¾Í²»»áÔÙÖ´ÐÐÕâ¸öº¯Êý
+/*  
+* //std::call_onceæ˜¯ä¸€ä¸ªå‡½æ•°æ¨¡æ¿ï¼Œæ˜¯c++11å¼•å…¥çš„å‡½æ•°
+* ç¬¬äºŒä¸ªå‚æ•°æ˜¯ä¸€ä¸ªå‡½æ•°åå­—ï¼Œcall_onceçš„åŠŸèƒ½æ˜¯ä¿è¯å‡½æ•°åªä¼šè¢«è°ƒç”¨ä¸€æ¬¡
+* call_onceå…·æœ‰äº’æ–¥é‡è¿™ç§èƒ½åŠ›ï¼Œè€Œä¸”æ•ˆçŽ‡ä¸Šï¼Œè¿™æ¯”äº’æ–¥æ¥ç»™ä½ å ç”¨çš„èµ„æºæ›´å°‘
+* call_onceéœ€è¦å’Œä¸€ä¸ªæ ‡è®°ç»“åˆä½¿ç”¨ï¼Œè¿™ä¸ªæ ‡è®°once_flagï¼Œå…¶å®žæ˜¯once_flagä¸€ç§ç»“æž„
+* call_onceå°±æ˜¯é€šè¿‡è¿™ä¸ªæ ‡è®°åˆ¤æ–­å‡½æ•°æ˜¯å¦æ‰§è¡Œï¼Œæ‰§è¡Œè¿‡å‡½æ•°åŽå°±æŠŠè¿™ä¸ªå‚æ•°è®¾ç½®ä¸ºå·²ç»è°ƒç”¨çŠ¶æ€
+* åŽç»­å†è°ƒç”¨ä½†æ˜¯æ ‡å¿—å·²ç»è¢«è®¾ç½®ä¸ºâ€œå·²ç»è°ƒç”¨â€çŠ¶æ€äº†ï¼Œå°±ä¸ä¼šå†æ‰§è¡Œè¿™ä¸ªå‡½æ•°
 */
 
