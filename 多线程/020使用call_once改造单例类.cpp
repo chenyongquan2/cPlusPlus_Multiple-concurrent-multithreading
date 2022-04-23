@@ -55,7 +55,22 @@ public:
 
 };
 //需要初始化静态成员变量
-MyCAS* MyCAS::m_instance = NULL;
+MyCAS* MyCAS::m_instance = NULL;//懒汉式(线程不安全)
+
+/*补充:
+//饿汉模式：程序一开始执行 就会在主线程里初始化instance，所以是线程安全的
+class Singleton2 {
+public:
+	static Singleton2* getInstance() {
+		return instance;
+	}
+private:
+	Singleton2() {}
+	static Singleton2 * instance;
+};
+Singleton2 * Singleton2::instance = new Singleton2;
+*/
+
 
 //线程入口函数
 void startThread()
