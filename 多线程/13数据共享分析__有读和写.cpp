@@ -5,75 +5,78 @@
 #include<list>
 using namespace std;
 
-//�ó�Ա������Ϊ�̳߳�ʼ������
+//用成员函数作为线程初始化函数
 
+//(而不用全局变量的方式来模拟，是因为想用类中的成员变量(多个线程)共享，更符合面向对象的思想。)
 class A
 {
 public:
-	//���յ�����Ϣ�뵽һ�����У����̵߳���������
+	//把收到的消息入到一个队列，子线程的启动函数
 	void inMsgRecvQueue()
 	{
 		for (int i = 0; i < 10000;i++)
 		{
-			cout << "inMsgQueue����һ��Ԫ��" << i << endl;
-			msgRecvQueue.push_back(i);//�����������i�����յ�����ҵ�����
+			cout << "inMsgQueue插入一个元素" << i << endl;
+			msgRecvQueue.push_back(i);//假设这个数字i就是收到的玩家的命令，我直接弄到消息队列里面。
 		}
 	}
 
-	//�����ݴ���Ϣ������ȡ�������߳�
+	//把数据从消息队列中取出的子线程
 	void outMsgRecvQueue()
 	{
 		for (int i = 0; i < 10000;i++)
 		{
 			if (!msgRecvQueue.empty())
 			{
-				//��Ϣ���в�Ϊ��
-				int command = msgRecvQueue.front();//���ص�һ��Ԫ��
-				msgRecvQueue.pop_front();//�Ƴ���һ��Ԫ��
+				//消息队列不为空
+				int command = msgRecvQueue.front();//返回第一个元素
+				msgRecvQueue.pop_front();//移除第一个元素
 			}
 			else
 			{
-				cout << "��Ϣ�����е���ϢΪ��" << i << endl;
+				cout << "消息队列中的消息为空" << i << endl;
 			}
 		}
 
 		cout << endl;
 	}
 private:
-	list<int>msgRecvQueue;//�������������ҷ��͹���������
+	list<int>msgRecvQueue;//容器用来存放玩家发送过来的命令(就是所谓的消息队列)
 };
 
 
 int main(void)
 {
 	A myobj;
-	thread myOutMsgObj(&A::outMsgRecvQueue, &myobj);//�ڶ��������ò��ܱ�֤�߳����õ���ͳһ������
+	//准备用成员函数作为线程函数的方法来写线程。(而不用全局变量的方式来模拟，是因为想用类中的成员变量(多个线程)共享，更符合面向对象的思想。)
+	thread myOutMsgObj(&A::outMsgRecvQueue, &myobj);//第二个是引用才能保证各个线程中用的是统同一个对象
 	thread myInMsObj(&A::inMsgRecvQueue, &myobj);
 	myOutMsgObj.join();
 	myInMsObj.join();
 
-	cout << "main�߳�" << endl;//���ִ����һ�䣬�����߳��˳�
+	cout << "main线程" << endl;//最后执行这一句，整个线程退出
 	system("pause");
 	return 0;
 }
 /*
-*�е��߳�д���ݣ��е��߳�д���ݣ���ô��Ҫ����Ĵ���,
-*��򵥵Ĵ������Ƕ���ʱ����д��д��ʱ���ܶ���ֻ����һ���߳�д
-*Ҳ����ֻ����һ���߳�ռ�����ݡ���������д���ݺͶ����ݶ��Ƿֺܶಽ��
-*�磺�ƶ�ָ��ȡ����������л��ᵼ�ºܶ��������鷢����
+*有的线程写数据，有的线程写数据，那么需要特殊的处理,
+*最简单的处理就是读的时候不能写，写的时候不能读，只能有一个线程写
+*也就是只能有一个线程占有数据。向容器中写数据和读数据都是分很多步骤
+*例如:写的动作分10小步，由于任务切换，导致各种诡异的事情发生（最可能的还是崩溃）
+*如：移动指针等。由于任务切换会导致很多诡异的事情发生。
 *
 *
-*���������
-*���ݹ�����ʵ������Ʊ��ʣ��Ʊ������Ҫ�����еĿͻ��˽��й��������Ҳ���֮��
-*Ҫԭ���Ե� 
+*其他情况：
+*数据共享的实例；火车票的剩余票数就需要在所有的客户端进行共享，并且操作之间
+*要原子性的 
 *
-*�������ݵı�����������
-*����Ҫ��һ��������Ϸ�����������������̣߳�һ���߳��ռ���������������д��һ��������
-*�ڶ����̴߳Ӷ�����ȡ����ҷ������������ִ����ҵĶ�����
-*���������ֱ�ʾ��ҷ��͹��������ʹ��list���档��Ƶ���İ�˳���ȡ����Ч�ʸ�--˫���б�����
+*共享数据的保护案例代码
+*假设要做一个网络游戏服务器，有两个子线程，一个线程收集玩家命令，并把命令写进一个队列中
+*第二个线程从队列中取出玩家发出的命令，解析执行玩家的动作。
+*这里用数字表示玩家发送过来的命令，使用list保存。在频繁的按顺序和取数据效率高--双向列表容器
 *
-*���ж�����д�������̣߳�������п��ƣ���ֻ֤��һ���߳̽��ж�����д���ɡ�
-*���룺����������--���̹߳������ݵı�������
+*当有读和有写的两个线程，必须进行控制，保证只有一个线程进行读或者写即可。
+*引入：互斥量问题--多线程共享数据的保护问题
 *
 */
 
