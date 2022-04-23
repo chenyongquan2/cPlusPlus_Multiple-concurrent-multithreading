@@ -23,6 +23,7 @@ public:
 			unique_lock<mutex> myGuard1(my_mutex1);
 			msgRecvQueue.push_back(i);
 			//my_cond.notify_one();//我们尝试把wait线程唤醒，执行后，wait被唤醒（本身解锁）
+			//若此时没有线程卡在wait这里，则上面的notify无效果。
 			my_cond.notify_all();
 		}
 	}
@@ -55,7 +56,7 @@ public:
 		while (true)
 		{
 			unique_lock<mutex>sbguard1(my_mutex1);
-			my_cond.wait(sbguard1,[this]
+			my_cond.wait(sbguard1,[this]//第一个参数为互斥量，第二个参数为可调用对象(要求返回一个bool值)
 			{
 				if (!msgRecvQueue.empty())
 				{
@@ -63,6 +64,28 @@ public:
 				}
 				return  false;
 			});
+			
+			/*
+			 * wait()用来等待一个东西
+			 * 如果第二个参数的lambda表达式返回值是true，并且此时互斥量Mutex处于加锁状态，那么wait()直接返回并继续执行。
+			 * 第二个参数lambad表达式返回值是false，那么wait将解锁互斥量。并阻塞到本行（睡眠），
+			 * 	阻塞到什么时候为止呢？阻塞到其他某个线程调用notify_one()成员函数为止；
+			 * 如果没有第二个参数，那么效果跟第二个参数lambda表达式返回false效果一样。
+				即wait()将解锁互斥量，并阻塞到本行，阻塞到其他某个线程调用notify_one()成员函数为止。
+
+			当其他线程用notify_one()将原本阻塞睡眠在wait()的线程唤醒后，恢复后的会去干啥
+			a)wait()不断尝试获取互斥量锁，如果获取不到互斥量锁,那么流程就卡在wait()这里等待获取互斥量锁(此时不会去睡眠)，
+				如果获取到了互斥量锁，那么wait()就继续执行到b)
+			b)
+				b.1)如果wait有第二个参数(可调用对象),就判断这个lambda表达式的返回值
+					如果表达式为false，那wait又对互斥量解锁，然后又休眠，等待再次被notify_one()唤醒
+					如果表达式为true，则wait返回，流程可以继续执行（此时互斥量已被锁住）。
+				b.2)如果wait没有第二个参数，则wait返回，流程走下去（此时互斥量已被锁住）。
+			*/
+			
+			
+			//能走到这里，说明一定已经对互斥量Mutex上了锁，并且此时msgRecvQueue满足了不为空的条件
+			
 			command = msgRecvQueue.front();
 			msgRecvQueue.pop_front();
 			sbguard1.unlock();//因为unique_lock的灵活性，可以随时解锁
@@ -70,23 +93,7 @@ public:
 			//加入现在正在处理一个事务，需要一段时间，而不是卡在wait()等待，此时这个
 			//notify_one()函数并没有作用。也就是说notify_one()不一定可以唤醒wait（）
 		}
-		/*
-		 * wait()用来等待一个东西
-		 * 第二个参数lambad表达式返回值是false，那么wait将解锁互斥量。并阻塞到本行（睡眠），
-		 * 阻塞到其他函数调用notify_one()为止。没有第二个参数等价与false。
-		 * 
-		 * 如果第二个返回值是true，，那么wait直接返回
-		 * 当其他线程使用notefy_one()唤醒wait再次尝试获取互斥量锁，如果获取不到线程
-		 * 阻塞这里等待获取，如果获取到锁，wait就继续执行b
-		 * （b）上锁
-		 *		如果wait有第二个参数，就（lambda），就判断这个表达式，如果表达式为false，就将互斥量解锁
-		 *		重新进入睡眠，等待再次被notefy_one()唤醒
-		 *		如果表示式为true，那么流程直接走下来。此时互斥锁还是锁着。
-		 *		流程只要能走到这里互斥锁一定是锁着的。
-		 *	如果wait没有第二个参数无条件向下走。
-		 * 
-		 * 
-		 */
+		
 		
 	}
 
