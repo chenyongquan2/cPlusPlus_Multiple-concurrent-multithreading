@@ -37,6 +37,10 @@ int main(void)
 	{
 		cout << "can not join" << endl;
 	}
+	
+	////////////////////////////////////
+	//Todo:注意，用了thread，一定得join或者detach()，否则会报异常
+	///////////////////////////////////
 	my_thread.detach();
 
 	if (my_thread.joinable())
