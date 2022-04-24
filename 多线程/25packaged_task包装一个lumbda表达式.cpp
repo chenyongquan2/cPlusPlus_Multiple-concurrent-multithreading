@@ -4,39 +4,43 @@
 #include <future>
 using namespace std;
 
-vector<std::packaged_task<int(int)>> myTasks;//tÈİÆ÷
+vector<std::packaged_task<int(int)>> myTasks;//tå®¹å™¨
 
 int main(void)
 {
-	cout << "Ö÷Ïß³Ìid=" << std::this_thread::get_id() << endl;
+	cout << "ä¸»çº¿ç¨‹id=" << std::this_thread::get_id() << endl;
 	std::packaged_task<int(int)>mpt([](int mypar)
 	{
 		cout << "mpar=" << mypar << endl;
 		chrono::milliseconds dura(5000);
 		this_thread::sleep_for(dura);
-		cout << "Ïß³Ì¿ªÊ¼Ö´ĞĞ,Ïß³ÌµÄidÊÇ£º" << std::this_thread::get_id() << endl;
-		//ĞİÏ¢5s
+		cout << "çº¿ç¨‹å¼€å§‹æ‰§è¡Œ,çº¿ç¨‹çš„idæ˜¯ï¼š" << std::this_thread::get_id() << endl;
+		//ä¼‘æ¯5s
 
 		return 5884;
 	});
-	std::thread t1(std::ref(mpt), 1);//1ÊÇ´«µİµÄ²ÎÊı,´´½¨Ò»¸öÏß³Ì£¬²¢¿ªÊ¼Ö´ĞĞ
+	std::thread t1(std::ref(mpt), 1);//1æ˜¯ä¼ é€’çš„å‚æ•°,åˆ›å»ºä¸€ä¸ªçº¿ç¨‹ï¼Œå¹¶å¼€å§‹æ‰§è¡Œ
 	t1.join();
-	//packaged_task°ÑÏß³Ìº¯Êı°ü×°ÁËÒ»²ã
+	//packaged_taskæŠŠçº¿ç¨‹å‡½æ•°åŒ…è£…äº†ä¸€å±‚
 
-	//Í¨¹ıfuture»ñÈ¡Î´À´º¯ÊıÖ´ĞĞµÄÖµ
-	//std::future¶ÔÏóÀïÃæ°üº¬ÓĞÏß³ÌÈë¿Úº¯ÊıµÄ½á¹û£¬result°üº¬mythreadµÄ·µ»Ø½á
-	//get_future()ÊÇpackaged_task()¶ÔÏóµÄ½Ó¿Ú
+	//é€šè¿‡futureè·å–æœªæ¥å‡½æ•°æ‰§è¡Œçš„å€¼
+	//std::futureå¯¹è±¡é‡Œé¢åŒ…å«æœ‰çº¿ç¨‹å…¥å£å‡½æ•°çš„ç»“æœï¼ŒresultåŒ…å«mythreadçš„è¿”å›ç»“
+	//get_future()æ˜¯packaged_task()å¯¹è±¡çš„æ¥å£
 	std::future<int> result = mpt.get_future();
 	cout << result.get() << endl;
 
 	////////////////////////////////////////////////////////////////////////////
-	myTasks.push_back(std::move(mpt));
-	//¸´ÖÆ
+	myTasks.push_back(std::move(mpt));//ç§»åŠ¨è¯­ä¹‰ï¼Œæ‰§è¡Œå®Œåmptä¼šå˜ç©ºã€‚
+	//å¤åˆ¶
 	std::packaged_task<int(int)>mypt2;
 	auto iter = myTasks.begin();
-	mypt2 = std::move(*iter);//ÒÆ¶¯ÓïÒå
-	myTasks.erase(iter);//É¾³ıµÚÒ»¸öÔªËØ£¬µü´úÆ÷ÒÑ¾­Ê§Ğ§£¬²»ÄÜÔÚ¼ÌĞøÊ¹ÓÃ
-	mypt2(123);
+	mypt2 = std::move(*iter);//ç§»åŠ¨è¯­ä¹‰
+	myTasks.erase(iter);//åˆ é™¤ç¬¬ä¸€ä¸ªå…ƒç´ ï¼Œè¿­ä»£å™¨å·²ç»å¤±æ•ˆï¼Œä¸èƒ½åœ¨ç»§ç»­ä½¿ç”¨
+	mypt2(123);//ç›´æ¥è°ƒç”¨ï¼Œç›¸å½“äºå‡½æ•°è°ƒç”¨(ä¸ä¼šåˆ›å»ºæ–°çš„çº¿ç¨‹ã€‚)
+	//åˆ›å»ºçº¿ç¨‹çš„å†™æ³•
+	//thread t2(std::ref(myTask), 20);//åƒä¸‡ä¸èƒ½å°‘äº†è¿™ä¸ªmyTaskï¼Œå¦åˆ™ä¼šç¼–è¯‘æŠ¥é”™errorã€‚
+	//t2.join();
+	
 	std::future<int> result2 = mypt2.get_future();
 	cout << result2.get() << endl;
 
@@ -46,10 +50,8 @@ int main(void)
 }
 
 /*
-*packaged_task ´ò°üÈÎÎñ£¬°ÑÈÎÎñ°ü×°ÆğÀ´
-*ÊÇ¸öÀàÄ£°å£¬ËüµÄÄ£°å²ÎÊıÊÇ¸÷ÖÖ¿Éµ÷ÓÃ¶ÔÏó£¬Í¨¹ıpackageed_task¿ÉÒÔ°Ñ
-*¸÷ÖÖ¿Éµ÷ÓÃ¶ÔÏó°ü×°ÆğÀ´£¬·½±ã×÷ÎªÏß³ÌÈë¿Úº¯ÊıÀ´µ÷ÓÃ¡£
-*packaged_task°ü×°ÆğÀ´µÄ¿Éµ÷ÓÃ¶ÔÏó£¬»¹¿ÉÒÔÖ±½Óµ÷ÓÃ£¬´ÓÕâ¸ö½Ç¶ÈÀ´½²packaged_taskÒ²ÊÇÒ»¸ö
-*¿Éµ÷ÓÃ¶ÔÏó¡£
+*packaged_task æ‰“åŒ…ä»»åŠ¡ï¼ŒæŠŠä»»åŠ¡åŒ…è£…èµ·æ¥
+*æ˜¯ä¸ªç±»æ¨¡æ¿ï¼Œå®ƒçš„æ¨¡æ¿å‚æ•°æ˜¯å„ç§å¯è°ƒç”¨å¯¹è±¡ï¼Œé€šè¿‡packageed_taskå¯ä»¥æŠŠå„ç§å¯è°ƒç”¨å¯¹è±¡åŒ…è£…èµ·æ¥ï¼Œæ–¹ä¾¿ä½œä¸ºçº¿ç¨‹å…¥å£å‡½æ•°æ¥è°ƒç”¨ã€‚
+*packaged_taskåŒ…è£…èµ·æ¥çš„å¯è°ƒç”¨å¯¹è±¡ï¼Œè¿˜å¯ä»¥ç›´æ¥è°ƒç”¨ï¼Œä»è¿™ä¸ªè§’åº¦æ¥è®²packaged_taskä¹Ÿæ˜¯ä¸€ä¸ªå¯è°ƒç”¨å¯¹è±¡ã€‚
 */
 
