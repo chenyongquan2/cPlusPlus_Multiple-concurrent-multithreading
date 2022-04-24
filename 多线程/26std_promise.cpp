@@ -12,11 +12,10 @@ void mythread(std::promise<int>&tem,int calc)
 	calc *= 10;
 	chrono::milliseconds dura(5000);
 	std::this_thread::sleep_for(dura);
-	//¼ÆËãÕûÕû»¨·ÑÁË5ÃëÖĞ
+	//Todo:è®¡ç®—æ•´æ•´èŠ±è´¹äº†5ç§’ä¸­
 
 	int result = calc;
-	//°Ñ½á¹û´«µİ³öÀ´
-	tem.set_value(result);
+	tem.set_value(result);//æŠŠç»“æœä¿å­˜ï¼Œé€šè¿‡temä¼ é€’å‡ºå»(åŒ…å«ä¸»çº¿ç¨‹)
 }
 
 void mythread2(std::future<int>&tem)
@@ -28,17 +27,17 @@ void mythread2(std::future<int>&tem)
 
 int main(void)
 {
-	std::promise<int> mypromise;//ÉúÃüÒ»¸öpromise¶ÔÏó£¬±£´æÀàĞÍÎªint
+	std::promise<int> mypromise;//ç”Ÿå‘½ä¸€ä¸ªpromiseå¯¹è±¡ï¼Œä¿å­˜ç±»å‹ä¸ºint
 	thread t1(mythread, std::ref(mypromise), 120);
-	t1.join();
+	t1.join();//Todo:æ³¨æ„ï¼Œç”¨äº†threadï¼Œä¸€å®šå¾—joinæˆ–è€…detach()
 
-	//»ñÈ¡½á¹û
-	//°ó¶¨
+	//è·å–ç»“æœ
+	//ç»‘å®š
 	std::future<int>future1 = mypromise.get_future();
-	auto result = future1.get();//get()Ö»ÄÜµ÷ÓÃÒ»´Î£¬²»ÄÜµ÷ÓÃ¶à´Î
+	auto result = future1.get();//æ³¨æ„ï¼šget()åªèƒ½è°ƒç”¨ä¸€æ¬¡ï¼Œä¸èƒ½è°ƒç”¨å¤šæ¬¡
 	cout << result << endl;
 
-	//ÔÚÆäËûÏß³ÌÖĞÊ¹ÓÃ
+	//åœ¨å…¶ä»–çº¿ç¨‹ä¸­ä½¿ç”¨
 	thread t2(mythread2, std::ref(future1));
 	t2.join();
 
@@ -48,8 +47,8 @@ int main(void)
 
 
 /*
- * std::promiseÒ²ÊÇÒ»¸öÀàÄ£°å
- * ÎÒÃÇÔÚÄ³Ò»¸öÏß³ÌÖĞ¸øËû¸³Öµ£¬È»ºóÔÙÆäËûÏß³ÌÖĞ°ÑÕâ¸öÖµÌáÈ¡³öÀ´¡£
- * Í¨¹ıpromise±£´æÒ»¸öÖµ£¬ÔÚ½«À´Ä³¸öÊ±¿ÌÎÒÃÇÍ¨¹ı°ÑÒ»¸öfuture¶ÔÏó°ó¶¨µ½Õâ¸öpromieseÀ´
- * µÃµ½°ó¶¨µÄÖµ
+ * std::promiseä¹Ÿæ˜¯ä¸€ä¸ªç±»æ¨¡æ¿
+ * æˆ‘ä»¬åœ¨æŸä¸€ä¸ªçº¿ç¨‹ä¸­ç»™ä»–èµ‹å€¼ï¼Œç„¶åå†å…¶ä»–çº¿ç¨‹ä¸­æŠŠè¿™ä¸ªå€¼æå–å‡ºæ¥ã€‚
+ * é€šè¿‡promiseä¿å­˜ä¸€ä¸ªå€¼ï¼Œåœ¨å°†æ¥æŸä¸ªæ—¶åˆ»æˆ‘ä»¬é€šè¿‡æŠŠä¸€ä¸ªfutureå¯¹è±¡ç»‘å®šåˆ°è¿™ä¸ªpromieseæ¥ï¼Œ
+ * å†é€šè¿‡è¿™ä¸ªfutureå¯¹è±¡çš„get()æ–¹æ³•å¾—åˆ°ç»‘å®šçš„å€¼
  */
