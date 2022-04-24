@@ -29,7 +29,7 @@ int main(void)
 {
 	std::promise<int> mypromise;//生命一个promise对象，保存类型为int
 	thread t1(mythread, std::ref(mypromise), 120);
-	t1.join();//Todo:注意，用了thread，一定得join或者detach()
+	t1.join();//Todo:注意，用了thread，一定得join或者detach(),否则会报异常
 
 	//获取结果
 	//绑定
@@ -37,7 +37,7 @@ int main(void)
 	auto result = future1.get();//注意：get()只能调用一次，不能调用多次
 	cout << result << endl;
 
-	//在其他线程中使用
+	//把传递出来的promise对象再经过get_future()出来的future对象取出来，然后在其他线程中使用
 	thread t2(mythread2, std::ref(future1));
 	t2.join();
 
