@@ -10,8 +10,8 @@ using namespace std;
 		cout << "mpar=" << mypar << endl;
 		chrono::milliseconds dura(5000);
 		this_thread::sleep_for(dura);
-		cout << "Ïß³Ì¿ªÊ¼Ö´ĞĞ,Ïß³ÌµÄidÊÇ£º" << std::this_thread::get_id() << endl;
-		//ĞİÏ¢5s
+		cout << "çº¿ç¨‹å¼€å§‹æ‰§è¡Œ,çº¿ç¨‹çš„idæ˜¯ï¼š" << std::this_thread::get_id() << endl;
+		//ä¼‘æ¯5s
 
 		return 5884;
 	}
@@ -20,15 +20,15 @@ using namespace std;
 
 int main(void)
 {
-	cout << "Ö÷Ïß³Ìid=" << std::this_thread::get_id() << endl;
-	std::packaged_task<int(int)>mpt(mythread);//·µ»ØÖµÀàĞÍ£¬²ÎÊıÀàĞÍ--ÎÒÃÇ°Ñº¯ÊımythreadÍ¨packaged_task°ü×°
-	std::thread t1(std::ref(mpt), 1);//1ÊÇ´«µİµÄ²ÎÊı,´´½¨Ò»¸öÏß³Ì£¬²¢¿ªÊ¼Ö´ĞĞ
+	cout << "ä¸»çº¿ç¨‹id=" << std::this_thread::get_id() << endl;
+	std::packaged_task<int(int)>mpt(mythread);//è¿”å›å€¼ç±»å‹ï¼Œå‚æ•°ç±»å‹--æˆ‘ä»¬æŠŠå‡½æ•°mythreadé€špackaged_taskåŒ…è£…
+	std::thread t1(std::ref(mpt), 1);//1æ˜¯ä¼ é€’çš„å‚æ•°,åˆ›å»ºä¸€ä¸ªçº¿ç¨‹ï¼Œå¹¶å¼€å§‹æ‰§è¡Œ
 	t1.join();
-	//packaged_task°ÑÏß³Ìº¯Êı°ü×°ÁËÒ»²ã
+	//packaged_taskæŠŠçº¿ç¨‹å‡½æ•°åŒ…è£…äº†ä¸€å±‚
 
-	//Í¨¹ıfuture»ñÈ¡Î´À´º¯ÊıÖ´ĞĞµÄÖµ
-	//std::future¶ÔÏóÀïÃæ°üº¬ÓĞÏß³ÌÈë¿Úº¯ÊıµÄ½á¹û£¬result°üº¬mythreadµÄ·µ»Ø½á
-	//get_future()ÊÇpackaged_task()¶ÔÏóµÄ½Ó¿Ú
+	//é€šè¿‡futureè·å–æœªæ¥å‡½æ•°æ‰§è¡Œçš„å€¼
+	//std::futureå¯¹è±¡é‡Œé¢åŒ…å«æœ‰çº¿ç¨‹å…¥å£å‡½æ•°çš„ç»“æœï¼ŒresultåŒ…å«mythreadçš„è¿”å›ç»“æœ
+	//get_future()æ˜¯packaged_task()å¯¹è±¡çš„æ¥å£
 	std::future<int> result = mpt.get_future();
 	cout << result.get() << endl;
 
@@ -37,8 +37,8 @@ int main(void)
 }
 
 /*
- *packaged_task ´ò°üÈÎÎñ£¬°ÑÈÎÎñ°ü×°ÆğÀ´
- *ÊÇ¸öÀàÄ£°å£¬ËüµÄÄ£°å²ÎÊıÊÇ¸÷ÖÖ¿Éµ÷ÓÃ¶ÔÏó£¬Í¨¹ıpackageed_task¿ÉÒÔ°Ñ
- *¸÷ÖÖ¿Éµ÷ÓÃ¶ÔÏó°ü×°ÆğÀ´£¬·½±ã×÷ÎªÏß³ÌÈë¿Úº¯ÊıÀ´µ÷ÓÃ¡£
+ *packaged_task æ‰“åŒ…ä»»åŠ¡ï¼ŒæŠŠä»»åŠ¡åŒ…è£…èµ·æ¥
+ *æ˜¯ä¸ªç±»æ¨¡æ¿ï¼Œå®ƒçš„æ¨¡æ¿å‚æ•°æ˜¯å„ç§å¯è°ƒç”¨å¯¹è±¡ï¼Œé€šè¿‡packageed_taskå¯ä»¥æŠŠ
+ *å„ç§å¯è°ƒç”¨å¯¹è±¡åŒ…è£…èµ·æ¥ï¼Œæ–¹ä¾¿ä½œä¸ºçº¿ç¨‹å…¥å£å‡½æ•°æ¥è°ƒç”¨ã€‚
 */
 
