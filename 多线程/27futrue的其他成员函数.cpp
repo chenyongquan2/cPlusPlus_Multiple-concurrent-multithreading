@@ -8,8 +8,8 @@ int mythread()
 {
 	chrono::milliseconds dura(5000);
 	this_thread::sleep_for(dura);
-	cout << "Ïß³Ì¿ªÊ¼Ö´ĞĞ,Ïß³ÌµÄidÊÇ£º" << std::this_thread::get_id() << endl;
-	//ĞİÏ¢5s
+	cout << "çº¿ç¨‹å¼€å§‹æ‰§è¡Œ,çº¿ç¨‹çš„idæ˜¯ï¼š" << std::this_thread::get_id() << endl;
+	//ä¼‘æ¯5s
 
 	return 5884;
 }
@@ -18,8 +18,8 @@ int mythread2()
 {
 	chrono::milliseconds dura(5000);
 	this_thread::sleep_for(dura);
-	cout << "Ïß³Ì¿ªÊ¼Ö´ĞĞ,Ïß³ÌµÄidÊÇ£º" << std::this_thread::get_id() << endl;
-	//ĞİÏ¢5s
+	cout << "çº¿ç¨‹å¼€å§‹æ‰§è¡Œ,çº¿ç¨‹çš„idæ˜¯ï¼š" << std::this_thread::get_id() << endl;
+	//ä¼‘æ¯5s
 
 	return 5884;
 }
@@ -29,45 +29,47 @@ int main(void)
 	std::future<int> result = std::async(mythread);
 	//std::future<int> result = std::async(std::launch::deferred,mythread);
 
-	//×Ô¶¯´´½¨Ò»¸öÏß³Ì£¬²¢Æô¶¯Ïß³ÌÈë¿Úº¯Êı
+	//è‡ªåŠ¨åˆ›å»ºä¸€ä¸ªçº¿ç¨‹ï¼Œå¹¶å¯åŠ¨çº¿ç¨‹å…¥å£å‡½æ•°
 	cout << "continue........" << endl;
 
-	
-	
-	
 	//int def = 0;
-	////¿¨ÔÚÕâÀïµÈ´ıÏß³ÌÖ´ĞĞÍê±Ï£¬Í¨¹ıfuture¶ÔÏóµÄget£¨£©·½·¨µÈ´ı³ÌĞò½áÊø²¢µÃµ½·µ»Ø½á¹û
-	//cout << "Î´À´µÄÖ´ĞĞ½á¹ûÊÇ£º" << result.get() << endl;
+	////å¡åœ¨è¿™é‡Œç­‰å¾…çº¿ç¨‹æ‰§è¡Œå®Œæ¯•ï¼Œé€šè¿‡futureå¯¹è±¡çš„getï¼ˆï¼‰æ–¹æ³•ç­‰å¾…ç¨‹åºç»“æŸå¹¶å¾—åˆ°è¿”å›ç»“æœ
+	//cout << "æœªæ¥çš„æ‰§è¡Œç»“æœæ˜¯ï¼š" << result.get() << endl;
 
-	//Ã¶¾ÙÀàĞÍ
-	//wait_for()µÈ´ıÒ»¶¨Ê±¼ä
-	std::future_status status = result.wait_for(std::chrono::seconds(6));//µÈ´ı1s
-	if (status==std::future_status::timeout)//³¬Ê±±íÊ¾Ïß³Ì»¹Ã»ÓĞÖ´ĞĞÍê±Ï
+	//æšä¸¾ç±»å‹
+	//wait_for()ç­‰å¾…ä¸€å®šæ—¶é—´
+	std::future_status status = result.wait_for(std::chrono::seconds(6));//ç­‰å¾…1s
+	if (status==std::future_status::timeout)//è¶…æ—¶(è¿™æ—¶å€™æˆ‘åªç­‰å¾…äº†1sï¼Œçº¿ç¨‹å´è¿˜æ²¡å›æ¥ è¿˜æ²¡å¹²å®Œ )è¡¨ç¤ºçº¿ç¨‹è¿˜æ²¡æœ‰æ‰§è¡Œå®Œæ¯•
 	{
-		cout << "³¬Ê±£¬Ïß³Ì»¹Ã»ÓĞÖ´ĞĞÍê±Ï" << endl;
+		cout << "è¶…æ—¶ï¼Œçº¿ç¨‹è¿˜æ²¡æœ‰æ‰§è¡Œå®Œæ¯•" << endl;
 	}
 	else if (status==std::future_status::ready)
 	{
-		cout << "Ïß³ÌÖ´ĞĞÍê±Ï" << endl;
+		cout << "çº¿ç¨‹æ‰§è¡Œå®Œæ¯•" << endl;
 	}
-	else if (status == std::future_status::deferred)//ÑÓ³Ù
+	else if (status == std::future_status::deferred)//å»¶è¿Ÿ
 	{
-		//Èç¹ûasync()µÄµÚÒ»¸ö²ÎÊı±»ÉèÖÃÎªdeferred ,Ôò±¾Ìõ¼ş³ÉÁ¢
-		cout << "Ïß³Ì±»ÑÓ³ÙÖ´ĞĞ" << endl;
-		//Ê¹ÓÃget()²Å»áÖ´ĞĞ£¬ÇÒÖ»ÄÜgetÒ»´Î
+		//å¦‚æœasync()çš„ç¬¬ä¸€ä¸ªå‚æ•°è¢«è®¾ç½®ä¸ºdeferred ,åˆ™æœ¬æ¡ä»¶æˆç«‹
+		cout << "çº¿ç¨‹è¢«å»¶è¿Ÿæ‰§è¡Œ" << endl;
+		//ä½¿ç”¨get()æ‰ä¼šæ‰§è¡Œï¼Œä¸”åªèƒ½getä¸€æ¬¡
 		cout << result.get() << endl;
 	}
 
 
-	//´´½¨µÚ¶ş¸öÏß³Ì	
+	//åˆ›å»ºç¬¬äºŒä¸ªçº¿ç¨‹	
 
 	std::future<int> result2 = std::async(mythread2);
-	std::shared_future<int>ressult3(std::move(result2));
-	////ÅĞ¶Ïfuture¶ÔÏóÀïÃæÊÇ·ñÓĞÖµ
-	//bool ifCanGet = ressult3.valid();
-	//cout << ifCanGet << endl;//½á¹ûÎª1
-	//std::shared_future<int>ressult3(result2.share());//µÈ¼ÛÓÚÕâÖÖĞ´·¨
-	//ÕâÀï¿ÉÒÔget¶à´Î
+	// æ™®é€šfutureçš„get()æ–¹æ³•ä½¿ç”¨ä¸¤æ¬¡ä¼šäº§ç”Ÿå¼‚å¸¸ï¼Œå› ä¸ºget()æ–¹æ³•çš„è®¾è®¡æ˜¯ä¸€ä¸ªç§»åŠ¨è¯­ä¹‰ã€‚ç›¸å½“äºå°†resultä¸­çš„å€¼ç§»åŠ¨åˆ°äº†aä¸­ï¼Œå†æ¬¡getå°±æŠ¥å‘Šäº†å¼‚å¸¸ã€‚
+	// auto a = result.get();
+	// cout << result.get() << endl;//æŠ¥å¼‚å¸¸ã€‚
+	
+	std::shared_future<int>ressult3(std::move(result2));//åªèƒ½è½¬æ¢æˆå³å€¼
+	////åˆ¤æ–­futureå¯¹è±¡é‡Œé¢æ˜¯å¦æœ‰å€¼
+	//bool ifCanGet2 = result2.valid();//ä¸ºfalse
+	//bool ifCanGet = ressult3.valid();//ä¸ºtrue
+	//cout << ifCanGet << endl;//ç»“æœä¸º1
+	//std::shared_future<int>ressult3(result2.share());////æ‰§è¡Œå®Œæ¯•åressult3é‡Œæœ‰å€¼ï¼Œè€Œresult2é‡Œç©ºäº†(share()æ–¹æ³•ä¹Ÿæ˜¯ç§»åŠ¨è¯­ä¹‰)
+	//è¿™é‡Œå¯ä»¥getå¤šæ¬¡
 	auto mythreadResult = ressult3.get();
 
 	system("pause");
@@ -75,9 +77,9 @@ int main(void)
 }
 
 /*
- *wait_for()·µ»ØÊÇÒ»¸öÃ¶¾ÙÀàĞÍ
- *get()·½·¨Ê¹ÓÃÁ½´Î»á²úÉúÒì³££¬ÒòÎªget()·½·¨µÄÉè¼ÆÊÇÒ»¸öÒÆ¶¯ÓïÒå¡£
- *share_future()Ò²ÊÇÒ»¸öÀàÄ£°å£¬future¶ÔÏóÖ»ÄÜget()Ò»´Î£¬share_future()µÄget()
- *·½·¨ÊÇ¸´ÖÆÊı¾İ¡£
+ *wait_for()è¿”å›æ˜¯ä¸€ä¸ªæšä¸¾ç±»å‹
+
+
+ *share_future()ä¹Ÿæ˜¯ä¸€ä¸ªç±»æ¨¡æ¿ï¼Œfutureå¯¹è±¡åªèƒ½get()ä¸€æ¬¡(ç§»åŠ¨è¯­ä¹‰)ï¼Œshare_future()çš„get()æ–¹æ³•æ˜¯å¤åˆ¶æ•°æ®ã€‚
 */
 
