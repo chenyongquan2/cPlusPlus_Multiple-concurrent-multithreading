@@ -1,0 +1,35 @@
+/*
+四.递归独占互斥量 std::recursive_mutex
+std::mutex 独占式互斥量
+std::recursive_mutex 允许在同一个线程中同一个互斥量多次被lock()(但是递归加锁的次数是有限制的，太多可能会报异常),效率要比mutex低。 
+如果你真的用了recursive_mutex 要考虑代码是否有优化空间(思考一下代码写得是不是不够好 才要用这个recursive_mutex)，
+如果能调用一次lock()就不要调用多次。
+
+//这个递归次数据说有限制，递归使用太多次会有异常。
+*/
+
+void myTest13()
+{
+    recursive_mutex mutex;
+    std::lock_guard<recursive_mutex> myguard1(mutex);
+    std::lock_guard<recursive_mutex> myguard2(mutex);
+    std::lock_guard<recursive_mutex> myguard3(mutex);
+    std::lock_guard<recursive_mutex> myguard4(mutex);
+    cout << "ok" << endl;
+}
+
+void f14()
+{
+	auto future = async(myTest13);
+	future.get();
+
+}
+
+int main()
+{
+	f14();
+	
+    return 0;
+}
+
+
