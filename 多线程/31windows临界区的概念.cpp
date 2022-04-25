@@ -7,56 +7,60 @@
 #include <windows.h>
 using namespace std;
 
-//ÓÃ³ÉÔ±º¯Êı×÷ÎªÏß³Ì³õÊ¼»¯º¯Êı
-#define __WINDOWS
+//ç”¨æˆå‘˜å‡½æ•°ä½œä¸ºçº¿ç¨‹åˆå§‹åŒ–å‡½æ•°
+#define __WINDOWS  
 
-//±¾ÀàÓÃÓÚ×Ô¶¯ÊÍ·ÅwindowsÏÂµÄÁÙ½çÈ¥£¬ÀàËÆÓÚlock_guard()
-class CwinLock//ÕâÖÖÀà±»³ÆÎªRAIIÀà£¨resource acquisition is initialation£©
+//æœ¬ç±»ç”¨äºè‡ªåŠ¨é‡Šæ”¾windowsä¸‹çš„ä¸´ç•Œå»ï¼Œç±»ä¼¼äºc++çš„lock_guard()èƒ½åŠ›ã€‚
+class CwinLock//è¿™ç§ç±»è¢«ç§°ä¸ºRAIIç±»ï¼ˆresource acquisition is initialationï¼‰
 {
 public:
-	CwinLock(CRITICAL_SECTION*pCritem)//¹¹Ôìº¯Êı
+	CwinLock(CRITICAL_SECTION*pCritem)//æ„é€ å‡½æ•°
 	{
 		m_pCritical = pCritem;
 		EnterCriticalSection(m_pCritical);
 	}
-	~CwinLock()//Îö¹¹º¯Êı
+	~CwinLock()//ææ„å‡½æ•°
 	{
 		LeaveCriticalSection(m_pCritical);
 	}
 private:
-	CRITICAL_SECTION *m_pCritical;
+	CRITICAL_SECTION *m_pCritical;//ä¸´ç•ŒåŒº
 };
 
 
 class A
 {
 public:
-	//°ÑÊÕµ½µÄÏûÏ¢Èëµ½Ò»¸ö¶ÓÁĞ£¬×ÓÏß³ÌµÄÆô¶¯º¯Êı
+	//æŠŠæ”¶åˆ°çš„æ¶ˆæ¯å…¥åˆ°ä¸€ä¸ªé˜Ÿåˆ—ï¼Œå­çº¿ç¨‹çš„å¯åŠ¨å‡½æ•°
 	void inMsgRecvQueue()
 	{
 		for (int i = 0; i < 10000; i++)
 		{
-			cout << "inMsgQueue²åÈëÒ»¸öÔªËØ" << i << endl;
+			cout << "inMsgQueueæ’å…¥ä¸€ä¸ªå…ƒç´ " << i << endl;
 #ifdef __WINDOWS
-			//½øÈëÁÙ½çÇø
-			//EnterCriticalSection(&my_winsec);
-			//msgRecvQueue.push_back(i);//Ö´ĞĞ²Ù×÷
-			//LeaveCriticalSection(&my_winsec);//Àë¿ªÁÙ½çÇø
+			//linuxä»£ç 
+			//è¿›å…¥ä¸´ç•ŒåŒº
+			//EnterCriticalSection(&my_winsec);//è¿›å…¥ä¸´ç•ŒåŒº(åŠ é”)
+			//EnterCriticalSection(&my_winsec);//è¿›å…¥ä¸´ç•ŒåŒº(åŠ é”)ï¼ŒåŒä¸€ä¸ªçº¿ç¨‹å…è®¸ä¸¤æ¬¡è¿›å…¥ ä½†æ˜¯é€€å‡ºä¹Ÿå¾—ä¸¤æ¬¡(æ¬¡æ•°åŒ¹é…)
+			//msgRecvQueue.push_back(i);//æ‰§è¡Œæ“ä½œ
+			//LeaveCriticalSection(&my_winsec);//ç¦»å¼€ä¸´ç•ŒåŒº(è§£é”)
+			//LeaveCriticalSection(&my_winsec);//ç¦»å¼€ä¸´ç•ŒåŒº(è§£é”),åŒä¸€ä¸ªçº¿ç¨‹å…è®¸ä¸¤æ¬¡è¿›å…¥ ä½†æ˜¯é€€å‡ºä¹Ÿå¾—ä¸¤æ¬¡(æ¬¡æ•°åŒ¹é…)
+			//è‹¥é€€å‡ºæ¬¡æ•°å°‘,åˆ™è¯´æ˜åŠ é”æ¬¡æ•°æ¯”è§£é”æ¬¡æ•°å°‘(ä¼šå¡ä½)
 
-			CwinLock wlock(&my_winsec);//µ÷ÓÃ¶à´Î²»»á³ö´í
-			msgRecvQueue.push_back(i);//Ö´ĞĞ²Ù×÷
-			
-
-#else
+			CwinLock wlock(&my_winsec);//è°ƒç”¨å¤šæ¬¡ä¸ä¼šå‡ºé”™
+			msgRecvQueue.push_back(i);//æ‰§è¡Œæ“ä½œ
+#else			
+			//æ¡ä»¶ç¼–è¯‘ï¼šè¿™ä¸€å—çš„ä»£ç ä¸å‚ä¸ç¼–è¯‘ï¼Œä¹Ÿå°±æ˜¯è¯´ä¸ä¼šåœ¨æœ€åçš„å¯æ‰§è¡Œç¨‹åºé‡Œé¢ã€‚
+			//linuxä»£ç 
 			std::lock_guard<mutex> my_lockguard(my_mutex);
 			//my_mutex.lock();
-			msgRecvQueue.push_back(i);//¼ÙÉèÕâ¸öÊı×Öi¾ÍÊÇÊÕµ½µÄÍæ¼ÒµÄÃüÁî
+			msgRecvQueue.push_back(i);//å‡è®¾è¿™ä¸ªæ•°å­—iå°±æ˜¯æ”¶åˆ°çš„ç©å®¶çš„å‘½ä»¤
 			//my_mutex.unlock();
 #endif
 		}
 	}
 	
-	//¶Á¹²ÏíÊı¾İº¯ÊıµÄ·â×°º¯Êı£¬Ê¹ÓÃlock_guard()
+	//è¯»å…±äº«æ•°æ®å‡½æ•°çš„å°è£…å‡½æ•°ï¼Œä½¿ç”¨lock_guard()
 	bool outMsgprocess(int&command)
 	{
 #ifdef __WINDOWS
@@ -64,9 +68,9 @@ public:
 
 		if (!msgRecvQueue.empty())
 		{
-			//ÏûÏ¢¶ÓÁĞ²»Îª¿Õ
-			command = msgRecvQueue.front();//·µ»ØµÚÒ»¸öÔªËØ
-			msgRecvQueue.pop_front();//ÒÆ³ıµÚÒ»¸öÔªËØ
+			//æ¶ˆæ¯é˜Ÿåˆ—ä¸ä¸ºç©º
+			command = msgRecvQueue.front();//è¿”å›ç¬¬ä¸€ä¸ªå…ƒç´ 
+			msgRecvQueue.pop_front();//ç§»é™¤ç¬¬ä¸€ä¸ªå…ƒç´ 
 			LeaveCriticalSection(&my_winsec);
 			return true;
 		}
@@ -77,18 +81,18 @@ public:
 		my_mutex.lock();
 		if (!msgRecvQueue.empty())
 		{
-			//ÏûÏ¢¶ÓÁĞ²»Îª¿Õ
-			command = msgRecvQueue.front();//·µ»ØµÚÒ»¸öÔªËØ
-			msgRecvQueue.pop_front();//ÒÆ³ıµÚÒ»¸öÔªËØ
+			//æ¶ˆæ¯é˜Ÿåˆ—ä¸ä¸ºç©º
+			command = msgRecvQueue.front();//è¿”å›ç¬¬ä¸€ä¸ªå…ƒç´ 
+			msgRecvQueue.pop_front();//ç§»é™¤ç¬¬ä¸€ä¸ªå…ƒç´ 
 			my_mutex.unlock();
 			return true;
 		}
 		my_mutex.unlock();
 		return false;
-		//ËùÓĞ·ÖÖ§¶¼ÒªÓĞunlock()£¬Á½¸ö³ö¿Ú±ØĞëÓĞÁ½¸öunlock()
+		//æ‰€æœ‰åˆ†æ”¯éƒ½è¦æœ‰unlock()ï¼Œä¸¤ä¸ªå‡ºå£å¿…é¡»æœ‰ä¸¤ä¸ªunlock()
 #endif
 	}
-	//°ÑÊı¾İ´ÓÏûÏ¢¶ÓÁĞÖĞÈ¡³öµÄ×ÓÏß³Ì
+	//æŠŠæ•°æ®ä»æ¶ˆæ¯é˜Ÿåˆ—ä¸­å–å‡ºçš„å­çº¿ç¨‹
 	void outMsgRecvQueue()
 	{
 		int command = 0;
@@ -97,34 +101,35 @@ public:
 			bool result = outMsgprocess(command);
 			if (result == true)
 			{
-				cout << "È¡ÏûÏ¢º¯ÊıÖ´ĞĞ³É¹¦" << command << endl;
+				cout << "å–æ¶ˆæ¯å‡½æ•°æ‰§è¡ŒæˆåŠŸ" << command << endl;
 			}
 			else
 			{
-				cout << "ÏûÏ¢¶ÓÁĞÖĞµÄÏûÏ¢Îª¿Õ" << i << endl;
+				cout << "æ¶ˆæ¯é˜Ÿåˆ—ä¸­çš„æ¶ˆæ¯ä¸ºç©º" << i << endl;
 			}
 		}
 
 		cout << endl;
 	}
 
-	//¶¨ÒåÒ»¸öwidowsÁÙ½çÇø±äÁ¿
+	//å®šä¹‰ä¸€ä¸ªwidowsä¸´ç•ŒåŒºå˜é‡
 #ifdef __WINDOWS
 	A()
 	{
-		//³õÊ¼»¯ÁÙ½çÇø,ÓÃÖ®Ç°±ØĞë³õÊ¼»¯
+		//åˆå§‹åŒ–ä¸´ç•ŒåŒº,ç”¨ä¹‹å‰å¿…é¡»åˆå§‹åŒ–
 		InitializeCriticalSection(&my_winsec);
 	}
 #endif
 private:
-	list<int>msgRecvQueue;//ÈİÆ÷ÓÃÀ´´æ·ÅÍæ¼Ò·¢ËÍ¹ıÀ´µÄÃüÁî
-	//´´½¨Ò»¸ö»¥³âÁ¿µÄ³ÉÔ±±äÁ¿
+	list<int>msgRecvQueue;//å®¹å™¨ç”¨æ¥å­˜æ”¾ç©å®¶å‘é€è¿‡æ¥çš„å‘½ä»¤
+	//åˆ›å»ºä¸€ä¸ªäº’æ–¥é‡çš„æˆå‘˜å˜é‡
 	mutex my_mutex;
-	//¶¨ÒåÒ»¸öµİ¹é»¥³âÁ¿--Ã»ÓĞÊ¹ÓÃ
+	//å®šä¹‰ä¸€ä¸ªé€’å½’äº’æ–¥é‡--æ²¡æœ‰ä½¿ç”¨
 	recursive_mutex my_mutex2;
 
-	//¶¨ÒåÒ»¸öwidowsÁÙ½çÇø±äÁ¿
+	
 #ifdef __WINDOWS
+	//å®šä¹‰ä¸€ä¸ªwidowsä¸´ç•ŒåŒºå˜é‡
 	CRITICAL_SECTION my_winsec;
 #endif
 
@@ -133,47 +138,48 @@ private:
 int main(void)
 {
 	A myobj;
-	thread myOutMsgObj(&A::outMsgRecvQueue, &myobj);//µÚ¶ş¸öÊÇÒıÓÃ²ÅÄÜ±£Ö¤Ïß³ÌÖĞÓÃµÄÊÇÍ³Ò»¸ö¶ÔÏó
+	thread myOutMsgObj(&A::outMsgRecvQueue, &myobj);//ç¬¬äºŒä¸ªæ˜¯å¼•ç”¨æ‰èƒ½ä¿è¯çº¿ç¨‹ä¸­ç”¨çš„æ˜¯ç»Ÿä¸€ä¸ªå¯¹è±¡
 	thread myInMsObj(&A::inMsgRecvQueue, &myobj);
 	myOutMsgObj.join();
 	myInMsObj.join();
 
-	cout << "mainÏß³Ì" << endl;//×îºóÖ´ĞĞÕâÒ»¾ä£¬Õû¸öÏß³ÌÍË³ö
+	cout << "mainçº¿ç¨‹" << endl;//æœ€åæ‰§è¡Œè¿™ä¸€å¥ï¼Œæ•´ä¸ªçº¿ç¨‹é€€å‡º
 	system("pause");
 	return 0;
 }
 
 
 /*
- * windowsÏÂµÄÁÙ½çÇø·Ç³£ÀàËÆÓÚc++11ÖĞµÄmutex;ÁÙ½çÇøÊ¹ÓÃÇ°±ØĞë³õÊ¼»¯
- * ĞèÒª°üº¬#include<windows.h>
- * (1)½øÈëÁÙ½çÇø£¨ºÍ¼ÓËøÒ»Ñù£©(2)Ö´ĞĞ²Ù×÷(3)Àë¿ªÁÙ½çÇø£¨ºÍ½âËøÒ»Ñùunlock()£©
+ * 1ï¼‰windowsä¸‹çš„ä¸´ç•ŒåŒºéå¸¸ç±»ä¼¼äºc++11ä¸­çš„mutex;ä¸´ç•ŒåŒºä½¿ç”¨å‰å¿…é¡»åˆå§‹åŒ–
+ * éœ€è¦åŒ…å«#include<windows.h>
+ * (1)è¿›å…¥ä¸´ç•ŒåŒºï¼ˆå’ŒåŠ é”ä¸€æ ·ï¼‰(2)æ‰§è¡Œæ“ä½œ(3)ç¦»å¼€ä¸´ç•ŒåŒºï¼ˆå’Œè§£é”ä¸€æ ·unlock()ï¼‰
  * 
- * ¶à´Î½øÈëÁÙ½çÇøÊµÑé
- *ÔÚÍ¬Ò»¸öÏß³ÌÖĞ£¬¶à´Î½øÈëÁÙ½çÇø£¨ÏàÍ¬µÄÁÙ½çÇø±äÁ¿£©£¬¾ÍÒª¶à´ÎÀë¿ªÁÙ½çÇø£¬ÒªÅä¶Ô£¬Ê¹ÓÃwindowsÁÙ½çÇøÊÇ¿ÉÒÔµÄ
- *½øÈë¼¸´ÎÁÙ½çÇø¾ÍÒªÀë¿ª¼¸´ÎÁÙ½çÇø¡£
- *c++11ÖĞ»¥³âÁ¿mutexÊÇ²»¿ÉÒÔ¼Ó¶à´ÎËø£¬½â¶à´ÎËø¡£--ÏàÍ¬µÄmutex²»ÔÊĞíÔÚÍ¬Ò»¸öÏß³ÌÖĞµ÷ÓÃ¶à´Î¡£
+ * 2ï¼‰å¤šæ¬¡è¿›å…¥ä¸´ç•ŒåŒºå®éªŒ
+ *åœ¨åŒä¸€ä¸ªçº¿ç¨‹ä¸­ï¼Œå¤šæ¬¡è¿›å…¥ä¸´ç•ŒåŒºï¼ˆç›¸åŒçš„ä¸´ç•ŒåŒºå˜é‡ï¼‰ï¼Œå°±è¦å¤šæ¬¡ç¦»å¼€ä¸´ç•ŒåŒºï¼Œè¦é…å¯¹ï¼Œä½¿ç”¨windowsä¸´ç•ŒåŒºæ˜¯å¯ä»¥çš„
+ ä¸åŒçº¿ç¨‹ä¸­ï¼Œç¬¬äºŒä¸ªè¿›å…¥ä¸Šè¿°ä¸´ç•ŒåŒºå˜é‡(å¦å¤–ä¸€ä¸ªçº¿ç¨‹å·²ç»è¿›å»äº† åŠ é”äº†)å‡†å¤‡è¿›å…¥çš„ ä¼šå¡ä½ã€‚
+ *è¿›å…¥å‡ æ¬¡ä¸´ç•ŒåŒºå°±è¦ç¦»å¼€å‡ æ¬¡ä¸´ç•ŒåŒºã€‚
+ 
+ *c++11ä¸­äº’æ–¥é‡mutexæ˜¯ä¸å¯ä»¥åŠ å¤šæ¬¡é”ï¼Œè§£å¤šæ¬¡é”ã€‚--ç›¸åŒçš„mutexä¸å…è®¸åœ¨åŒä¸€ä¸ªçº¿ç¨‹ä¸­è°ƒç”¨å¤šæ¬¡ã€‚å¦åˆ™ä¼šå´©æºƒ
  *
  *
- *×Ô¶¯Îö¹¹¼¼Êõ
- *std::lock_guard()¼¼Êõ¾ÍÊÇÊ¹ÓÃ×Ô¶¯Îö¹¹¼¼Êõ¡£
+ *3ï¼‰è‡ªåŠ¨ææ„æŠ€æœ¯
+ *std::lock_guard()æŠ€æœ¯å°±æ˜¯ä½¿ç”¨è‡ªåŠ¨ææ„æŠ€æœ¯ã€‚
  *
+ *é€’å½’çš„ç‹¬å äº’æ–¥é‡ recursive mutex--å¯ä»¥åŒä¸€ä¸ªçº¿ç¨‹å¤šæ¬¡lock(),ç”¨æ³•ä¸mutexç›¸åŒ
+ *å¦‚æœä½¿ç”¨äº†ä¸¤æ¬¡lock()--->åº”è¯¥è€ƒè™‘ä»£ç æ˜¯å¦æœ‰ä¼˜åŒ–çš„ç©ºé—´
  *
- *µİ¹éµÄ¶ÀÕ¼»¥³âÁ¿ recursive mutex--¿ÉÒÔÍ¬Ò»¸öÏß³Ì¶à´Îlock(),ÓÃ·¨ÓëmutexÏàÍ¬
- *Èç¹ûÊ¹ÓÃÁËÁ½´Îlock()--->Ó¦¸Ã¿¼ÂÇ´úÂëÊÇ·ñÓĞÓÅ»¯µÄ¿Õ¼ä
- *
- *´ø³¬Ê±µÄ»¥³âÁ¿ std::timed_mutex--³¬Ê±¹¦ÄÜµÄ»¥³âÁ¿,µÈ´ı³¬¹ıÊ±¼ä²»×èÈû
- *	¶àÁË½Ó¿Ú  try_lock_for()   try_lock_until()--µÈ´ıÎ´À´µÄÒ»¸öÊÀ½ç½Úµã
+ *å¸¦è¶…æ—¶çš„äº’æ–¥é‡ std::timed_mutex--è¶…æ—¶åŠŸèƒ½çš„äº’æ–¥é‡,ç­‰å¾…è¶…è¿‡æ—¶é—´ä¸é˜»å¡
+ *	å¤šäº†æ¥å£  try_lock_for()   try_lock_until()--ç­‰å¾…æœªæ¥çš„ä¸€ä¸ªä¸–ç•ŒèŠ‚ç‚¹
  std::chrono::milliseconds timeout(100);
  *if(my_mutex2.try_lock_for(timeout))
- *»òÕß if (my_mutex2.try_lock_until(chrono::stead_clock::now()+timeout))
+ *æˆ–è€… if (my_mutex2.try_lock_until(chrono::stead_clock::now()+timeout))
  *{
- *	Ã»ÓĞÄÃµ½ËøÍ·
+ *	æ²¡æœ‰æ‹¿åˆ°é”å¤´
  *}
  *else
  *{
- *	½øÈëË¯Ãß100ms£¬¿´ÏÂ´ÎÄÜ²»ÄÜÄÃµ½Ëø
+ *	è¿›å…¥ç¡çœ 100msï¼Œçœ‹ä¸‹æ¬¡èƒ½ä¸èƒ½æ‹¿åˆ°é”
  *}
  *
- *std::recursive_timed_mutex´ø³¬Ê±¹¦ÄÜµÄµİ¹é»¥³âÁ¿
+ *std::recursive_timed_mutexå¸¦è¶…æ—¶åŠŸèƒ½çš„é€’å½’äº’æ–¥é‡
  */
