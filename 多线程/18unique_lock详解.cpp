@@ -189,9 +189,9 @@ int main(void)
  (使用前提:前面自个线程先提前调用lock()锁住，因为可能会出现在本线程lock()两次)
  
  
- 3)default_lock
+ 3)defer_lock
  （使用前提：不能提前lock）
- *default_lock的意思就是没有给mutex加锁，初始化了一个没有加锁的mutex，
+ *defer_lock的意思就是没有给mutex加锁，初始化了一个没有加锁的mutex，
  
  //我们借着default_lock的话题，可以灵活的调用一些unique_lock的成员函数。
  4)unique_lock的一些成员函数:
